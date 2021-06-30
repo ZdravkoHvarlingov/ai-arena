@@ -105,7 +105,7 @@ class ArenaScreen(Screen):
         winner_label = font.render(text, True, (0, 0, 0))
         winner_width, _ = winner_label.get_size()
 
-        surface.blit(winner_label, (550 - winner_width // 2, 180))
+        surface.blit(winner_label, (550 - winner_width // 2, 40))
 
     def draw(self, surface: pygame.Surface):
         if self.is_started is False:

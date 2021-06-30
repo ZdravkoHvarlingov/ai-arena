@@ -41,13 +41,14 @@ class World:
 
         # Draw the Neural Network
         nn_surface = pygame.Surface((300, 500))
+        nn_surface.fill((255, 255, 255))
         if self.agent:
             self.agent.draw_nn(nn_surface)
-            self.agent.draw_labels(surface)
             surface.blit(nn_surface, (25, 100))
 
         # Draw the world
         world_surface = pygame.Surface(self.size.toilist())
+        world_surface.fill((255, 255, 255))
         pygame.draw.line(world_surface, black, (0, 0), (self.size.x-1, 0), 1)
         pygame.draw.line(world_surface, black, (0, self.size.y-1), (self.size.x-1, self.size.y-1), 1)
         pygame.draw.line(world_surface, black, (self.size.x-1, 0), (self.size.x-1, self.size.y-1), 1)

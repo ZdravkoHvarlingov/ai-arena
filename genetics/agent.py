@@ -236,22 +236,6 @@ class Agent(CollidableEntity):
             self.most_repeated_counter = self.same_action_counter
             self.most_repeated_action = best_so_far
 
-    def draw_labels(self, surface):
-        font = pygame.font.SysFont('Arial', 20)
-        y_spacing = 35
-
-        input_labels = ["     en_dst", "    blt_dst", "             x", "             y", "      angle", "reload_tm", "en_in_fov"]
-        for ind, input_label in enumerate(input_labels):
-            label = font.render(input_label, True, (0, 0, 0))
-
-            surface.blit(label, (5, 230 + ind * y_spacing))
-
-        output_labels = ["move", "CW", "CCW", "shoot"]
-        for ind, output_label in enumerate(output_labels):
-            label = font.render(output_label, True, (0, 0, 0))
-
-            surface.blit(label, (264, 283 + ind * y_spacing))
-
     def draw_nn(self, surface):
         nn_inputs = self.nn_inputs
         y_spacing = 35

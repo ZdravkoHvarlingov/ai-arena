@@ -1,6 +1,6 @@
 {
     "algorithms": {
-        "population_size": 110,
+        "population_size": 1000,
         "selection_type": "roulette",
         "mutation_type": "all_weights_mutation",
         "mutation_rate": 0.01,

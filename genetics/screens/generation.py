@@ -47,7 +47,7 @@ class GenerationScreen(Screen):
             Config.get("arena.creature_name_tag"),
             Config.get("algorithms.population_size"),
             2,
-            20,
+            14,
             fitness_func,
             FunctionMapper.get_func(Config.get("algorithms.activation_func")),
             SelectionMapper.get_selection(Config.get("algorithms.selection_type")),
