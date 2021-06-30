@@ -1,0 +1,23 @@
+{
+    "algorithms": {
+        "population_size": 110,
+        "selection_type": "roulette",
+        "mutation_type": "all_weights_mutation",
+        "mutation_rate": 0.01,
+        "cross_over_type": "two_points",
+        "previous_generation_rate": 0.1,
+        "activation_func": "sigmoid",
+        "training_thread_number": 4
+    },
+    "serialization": {
+        "serialization_frequency": 1,
+        "generation_serialization_folder": "generations",
+        "best_creature_serialization_folder": "best_so_far",
+        "generation_deserialization_folder": "generations",
+        "best_creature_deserialization_folder": "best_so_far"
+    },
+    "arena": {
+        "creature_name_tag": "zdravko",
+        "fight_duration_in_s": 30
+    }
+}
