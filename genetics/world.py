@@ -85,7 +85,7 @@ class CollidableEntity(Entity):
         distance = (self.position - c2.position).norm()
 
         # Since the objects are round
-        return distance < self.half_size.x + c2.half_size.x
+        return distance + 5 < self.half_size.x + c2.half_size.x
 
 
 class Bullet(CollidableEntity):

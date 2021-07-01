@@ -1,21 +1,23 @@
+import multiprocessing
 import pickle
+import logging
+
 import numpy as np
 
+from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
-from .neuralnet import NeuralNetwork
 from .evaluation_arena import EvaluationArena
-
+from .neuralnet import NeuralNetwork
 from .utils import pickle_serialization
 
 NUMBER_OF_FRAMES = 1800
 
+logging.basicConfig(format='[%(levelname)s] %(asctime)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger()
 
-def thread_func(thread_pairs, res, fitness_func, thread_number, number_of_threads):
-    # If we consider N number of threads
-    # First one takes 0, N, 2N, ...
-    # Second one takes 1, N + 1, 2N + 1, ...
-    for i in range(thread_number, len(thread_pairs), number_of_threads):
-        pair = thread_pairs[i]
+
+def process_func(pairs, results_queue: multiprocessing.Queue, fitness_func):
+    for pair in pairs:
         nn1 = pair[0]
         nn2 = pair[1]
 
@@ -23,14 +25,14 @@ def thread_func(thread_pairs, res, fitness_func, thread_number, number_of_thread
             arena = EvaluationArena(nn1, nn2)
             nn1_metrics, nn2_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
         except Exception as error:
+            logger.exception('Exception')
             print(f'Error happened while simulating the arena: {error}')
 
         score = fitness_func(nn1_metrics, nn2_metrics)
-        res.append((nn1, score))
+        results_queue.put((nn1, score))
 
         score = fitness_func(nn2_metrics, nn1_metrics)
-        res.append((nn2, score))
-
+        results_queue.put((nn1, score))
 
 class GeneticEvolution:
     def __init__(self, creator_tag, population_size, fitness_func,
@@ -67,18 +69,38 @@ class GeneticEvolution:
 
         return self._population[net_id][0]
 
-    def evaluate_population(self, number_of_threads):
+    def evaluate_population(self, number_of_processes):
         nets = list(map(lambda pair: pair[0], self._population))
         np.random.shuffle(nets)
         middle = len(nets) // 2
-        thread_pairs = list(zip(nets[:middle], nets[middle:]))
+        pairs = list(zip(nets[:middle], nets[middle:]))
 
-        res = []
-        with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-            executor.map(lambda args: thread_func(*args), [(thread_pairs, res, self.fitness_func, thread_number, number_of_threads) for thread_number in range(number_of_threads)])
+        batch_size = len(pairs) // number_of_processes
+        if batch_size * number_of_processes != len(pairs):
+            batch_size += 1
+        logger.info(f'Evaluating all agents with {batch_size} pairs per process')
 
-        res.sort(key=lambda x: x[1], reverse=True)
-        self._population = res
+        results_queue = multiprocessing.Queue()
+        processes = []
+        for idx in range(number_of_processes):
+            batch_start = idx * batch_size
+            batch_end = min((idx + 1) * batch_size, len(pairs))
+            process_pairs = pairs[batch_start: batch_end]
+            logger.info(f'Process {idx} is taking pairs from {batch_start} to {batch_end - 1} inclusive')
+
+            process = multiprocessing.Process(target=process_func, args=(process_pairs, results_queue, self.fitness_func))
+            processes.append(process)
+            process.daemon = True
+            
+            process.start()
+
+        results = []
+        for _ in tqdm(range(len(self._population))):
+            net_and_score = results_queue.get(block=True, timeout=None)
+            results.append(net_and_score)  
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        self._population = results
         self.is_evaluated = True
 
     def create_next_generation(self):

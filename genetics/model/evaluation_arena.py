@@ -30,13 +30,10 @@ class EvaluationArena:
         dt_60_fps = 1 / 60
         dt_60_fps *= 1.5
 
-        start = time.time()
         tick = 0
         while tick < frames:
             self.update(dt_60_fps)
             tick += 1
-        end = time.time()
-        print(f'Fight finished in {end - start}s')
 
         agent1_metrics = AgentMetrics(self.agent1, frames)
         agent2_metrics = AgentMetrics(self.agent2, frames)

@@ -54,7 +54,7 @@ Inside the config folder you can find **app_config.json** file where you can adj
 5. **cross_over_type** - specifies the algorithm used for new children generation. Currently two available - *arithmetic* and *two_points*. Additional can be added inside genetics -> model -> cross_over.py;
 6. **previous_generation_rate** - specifies the percent of parents (in the range [0, 1]) which should be taken directly to the next generation;
 7. **activation_func** - specifies the activation function type. Four currently available - *sigmoid*, *relu*, *leaky_relu*, *tanh*
-8. **training_thread_number** - the number of threads used for the training. Be aware that 1 thread is used for the UI to be interactive and 1 more which waits for all training threads to finish. So if you specify 4 training threads 6 overall will be used(If you use more than your system can run at the same time - performance drops accordingly);
+8. **training_process_number** - the number of processes used for the training. Be aware that 1 process with 1 thread is used for the UI to be interactive and 1 more thread which waits for all training processes to finish. So if you specify 4 training process 5 overall will be used(If you use more than your system can run at the same time - performance drops accordingly);
 9. **serialization_frequency** - specifies how often the generation should be serialized(checkpoint);
 10. **generation_serialization_folder** - specifies where the generation should be serialized. The file name is *generation.data*;
 11. **best_creature_serialization_folder** - specifies where the best creature of the generation to be serialized. The file name is *creature.net*
@@ -66,5 +66,4 @@ Inside the config folder you can find **app_config.json** file where you can adj
 
 ## TO DO:
 1. Implement the tournament functionlity which deserializes a lot of creatures from the same directory and runs a tournament;
-2. Shallow copying should be changed to deep copy. This is a minor problem with the roulette selection because one parent can be chosen more than once for the next generation. Once you mutate one of the copies - the other one will be changed as well.
-3. A lot of hard coded data in the graphics part - should be removed.
+2. A lot of hard coded data in the graphics part - should be removed.

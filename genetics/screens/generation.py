@@ -2,6 +2,7 @@ import pygame
 import threading
 import logging
 import os
+import time
 
 from .screen import Screen, Button, Vec2
 from genetics.config import Config
@@ -54,7 +55,7 @@ class GenerationScreen(Screen):
             Config.get("algorithms.mutation_rate"),
             CrossOverMapper.get_cross_over(Config.get("algorithms.cross_over_type")))
 
-        self.thread_n = Config.get("algorithms.training_thread_number")
+        self.process_n = Config.get("algorithms.training_process_number")
         self.should_train = False
         self.should_join = False
         self.is_joined = True
@@ -69,7 +70,7 @@ class GenerationScreen(Screen):
         logger.debug(f'Mutation type: {Config.get("algorithms.mutation_type")}')
         logger.debug(f'Mutation rate: {Config.get("algorithms.mutation_rate")}')
         logger.debug(f'Cross over type: {Config.get("algorithms.cross_over_type")}')
-        logger.debug(f'Training thread number: {Config.get("algorithms.training_thread_number")}')
+        logger.debug(f'Training process number: {Config.get("algorithms.training_process_number")}')
 
     def make_random_fight(self):
         if not self.is_joined:
@@ -96,6 +97,7 @@ class GenerationScreen(Screen):
             return
 
         self.training_thread = threading.Thread(target=self.train)
+        self.training_thread.deamon = True
         self.should_train = True
         self.should_join = False
         self.is_joined = False
@@ -108,19 +110,11 @@ class GenerationScreen(Screen):
         creature_serialization_folder = Config.get("serialization.best_creature_serialization_folder")
 
         while self.should_train:
-            # In case of the begining when the population is not evaluated
-            if not self.genetic_algorithm.is_evaluated:
-                logger.info(f'GENERATION #{self.genetic_algorithm.current_generation} is being evaluated...')
-                self.genetic_algorithm.evaluate_population(self.thread_n)
-                logger.info(f'TOP FITNESS FOR GENERATION #{self.genetic_algorithm.current_generation} is {self.genetic_algorithm.top_fitness}\n')
-
-            logger.info(f'GENERATION #{self.genetic_algorithm.current_generation + 1} of size {self.genetic_algorithm._population_size} is being created...')
-            self.genetic_algorithm.create_next_generation()
-            logger.info(f'GENERATION #{self.genetic_algorithm.current_generation} created')
-
-            # The current is always evaluated
             logger.info(f'GENERATION #{self.genetic_algorithm.current_generation} is being evaluated...')
-            self.genetic_algorithm.evaluate_population(self.thread_n)
+            ev_start = time.time()
+            self.genetic_algorithm.evaluate_population(self.process_n)
+            ev_end = time.time()
+            logger.info(f'EVALUATION FINISHED IN {(ev_end - ev_start):.2f}s')
             logger.info(f'TOP FITNESS FOR GENERATION #{self.genetic_algorithm.current_generation} is {self.genetic_algorithm.top_fitness}\n')
 
             if self.genetic_algorithm.current_generation % serialization_frequency == 0:
@@ -128,6 +122,20 @@ class GenerationScreen(Screen):
 
                 best_so_far = self.genetic_algorithm.best_network_so_far
                 best_so_far.serialize(os.path.join(creature_serialization_folder, 'creature.net'))
+            
+            logger.info(f'GENERATION #{self.genetic_algorithm.current_generation + 1} of size {self.genetic_algorithm._population_size} is being created...')
+            try:
+                self.genetic_algorithm.create_next_generation()
+            except Exception as ex:
+                logger.exception('Exception: ')
+                logger.error(ex)
+
+            logger.info(f'GENERATION #{self.genetic_algorithm.current_generation} created')
+
+        # The last is always evaluated
+        logger.info(f'GENERATION #{self.genetic_algorithm.current_generation} is being evaluated...')
+        self.genetic_algorithm.evaluate_population(self.process_n)
+        logger.info(f'TOP FITNESS FOR GENERATION #{self.genetic_algorithm.current_generation} is {self.genetic_algorithm.top_fitness}\n')
 
         self.should_join = True
 

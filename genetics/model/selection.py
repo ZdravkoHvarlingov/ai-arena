@@ -75,7 +75,7 @@ class RouletteSelection(Selection):
             net1_id = self._choose_element()
             net2_id = self._choose_element()
             if net1_id == net2_id:
-                continue
+                print(f'Same nets chosen for reproduction. Skipping...')
 
             child1, child2 = self.population[net1_id][0].cross_over(self.population[net2_id][0])
             next_generation.extend([(child1, 0), (child2, 0)])
@@ -108,10 +108,12 @@ class RouletteSelection(Selection):
         return neural_net
 
     def _choose_parents(self):
-        if self.parent_rate == 0:
-            return [self.population[0]]
+        parents = []
+        parents.append(self.population[0])
 
         amount = int(len(self.population) * self.parent_rate)
-        parents = [self.population[self._choose_element()] for _ in range(amount)]
+        for _ in range(amount):
+            pair = self.population[self._choose_element()]
+            parents.append(pair)
 
-        return [self.population[0]].extend(parents)
+        return parents

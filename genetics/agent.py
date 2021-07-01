@@ -51,6 +51,7 @@ class Agent(CollidableEntity):
         self.manual = False
 
         self.previous_action = -1
+        self.previous_input = None
         self.bullets_taken = 0
         self.successful_shots = 0
         self.shots_during_reloading = 0
@@ -64,7 +65,6 @@ class Agent(CollidableEntity):
         self.is_enemy_in_fov = 0
         self.enemy_is_close = 0
 
-        self.font = pygame.font.SysFont('Arial', 15)
         self.nn_input_labels = ['dst en', 'dst blt', 'x', 'y', 'rt angle', 'reload', 'en fov']
 
     @property
@@ -190,6 +190,8 @@ class Agent(CollidableEntity):
             self.position.y = self.half_size.y
 
         nn_inputs = self.nn_inputs
+        self.previous_input = nn_inputs
+
         if nn_inputs[-1] > 0.8:
             self.is_enemy_in_fov += 1
         en, en_dist, _, _ = self.closest_entities
@@ -240,6 +242,8 @@ class Agent(CollidableEntity):
             self.most_repeated_action = action_idx
 
     def draw_nn(self, surface):
+        font = pygame.font.SysFont('Arial', 15)
+
         nn_inputs = self.nn_inputs
         y_spacing = 35
         x_spacing = 60
@@ -266,14 +270,18 @@ class Agent(CollidableEntity):
             if x == 0:
                 for y in range(layer.shape[0]):
                     pygame.draw.circle(surface, to_color(nn_inputs[y]), (psx, psy + (y_spacing * y)), 5)                    
-                    label = self.font.render(self.nn_input_labels[y], True, (0, 0, 0))
+                    label = font.render(self.nn_input_labels[y], True, (0, 0, 0))
                     surface.blit(label, (0, psy + (y_spacing * y) -12))
+
+                if self.previous_input is not None:
+                    fov_label = font.render(f'fov: {self.previous_input[-1]:.2f}', True, (0, 0, 0))
+                    surface.blit(fov_label, (0, psy + (y_spacing * layer.shape[0])))
 
             if x == len(self.neural_net.matrices) - 1:
                 pygame.draw.circle(surface, (0, 255, 0), (sx, sy + (y_spacing * self.previous_action)), 5)
                 
                 for y, _ in enumerate(layer[0]):
-                    label = self.font.render(self.actions[y].name, True, (0, 0, 0))
+                    label = font.render(self.actions[y].name, True, (0, 0, 0))
                     surface.blit(label, (sx + 7, sy + (y_spacing * y) - 12))
 
     def draw(self, surface):
