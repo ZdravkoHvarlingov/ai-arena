@@ -6,7 +6,7 @@
         "mutation_rate": 0.01,
         "cross_over_type": "two_points",
         "previous_generation_rate": 0.1,
-        "activation_func": "leaky_relu",
+        "activation_func": "sigmoid",
         "training_thread_number": 1
     },
     "serialization": {

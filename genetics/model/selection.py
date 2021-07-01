@@ -109,7 +109,9 @@ class RouletteSelection(Selection):
 
     def _choose_parents(self):
         if self.parent_rate == 0:
-            return []
+            return [self.population[0]]
 
         amount = int(len(self.population) * self.parent_rate)
-        return [self.population[self._choose_element()] for _ in range(amount)]
+        parents = [self.population[self._choose_element()] for _ in range(amount)]
+
+        return [self.population[0]].extend(parents)
