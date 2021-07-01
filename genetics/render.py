@@ -35,7 +35,7 @@ class Render:
         while running:
             # Limit framerate (And CPU usage :) )
             dt = self.clock.tick(60) / 1000.0
-            dt *= 2
+            dt *= 1.5
             # Unstack event data
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

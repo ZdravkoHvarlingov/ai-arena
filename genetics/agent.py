@@ -224,25 +224,20 @@ class Agent(CollidableEntity):
             return
 
         output = self.neural_net.forward(nn_inputs)
+        action_idx = np.random.choice(list(range(len(output))), p=output)
+        
+        self.actions[action_idx].do(self)
+        self.add_action(self.actions[action_idx])
 
-        best_so_far = -1
-        max_value = -1
-        for i, o in enumerate(output):
-            if max_value < o:
-                max_value = o
-                best_so_far = i
-        self.actions[best_so_far].do(self)
-        self.add_action(self.actions[best_so_far])
-
-        if self.previous_action == best_so_far:
+        if self.previous_action == action_idx:
             self.same_action_counter += 1
         else:
             self.same_action_counter = 1
-        self.previous_action = best_so_far
+        self.previous_action = action_idx
 
         if self.same_action_counter > self.most_repeated_counter:
             self.most_repeated_counter = self.same_action_counter
-            self.most_repeated_action = best_so_far
+            self.most_repeated_action = action_idx
 
     def draw_nn(self, surface):
         nn_inputs = self.nn_inputs

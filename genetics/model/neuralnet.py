@@ -59,7 +59,7 @@ class NeuralNetwork:
             current_input += self.biases[idx]
             current_input = self.activation_func(current_input)
 
-        return current_input
+        return NeuralNetwork.softmax(current_input)
 
     def cross_over(self, other: "NeuralNetwork"):
         child1 = NeuralNetwork(self.creator_tag, self.activation_func, self.cross_over_method, False)
@@ -89,3 +89,9 @@ class NeuralNetwork:
     def deserialize(filename):
         with open(filename, 'rb') as binary_file:
             return pickle.load(binary_file)
+    
+    @staticmethod
+    def softmax(x):
+        """Compute softmax values for each sets of scores in x."""
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum()

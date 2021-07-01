@@ -28,7 +28,7 @@ class EvaluationArena:
 
     def perform_fight(self, frames):
         dt_60_fps = 1 / 60
-        dt_60_fps *= 2
+        dt_60_fps *= 1.5
 
         start = time.time()
         tick = 0
