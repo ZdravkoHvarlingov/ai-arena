@@ -35,7 +35,7 @@ class Render:
         while running:
             # Limit framerate (And CPU usage :) )
             dt = self.clock.tick(60) / 1000.0
-
+            dt *= 2
             # Unstack event data
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -52,28 +52,6 @@ class Render:
 
                 self.screen.fill((255, 255, 255))
                 self.cur_screen.draw(self.screen)
-
-            # # Update entities
-            # self.world.update(delta_s=dt*10)
-            #
-            # # Check key inputs
-            # if self.get_key(KEY_FORWARD):
-            #     self.agent.forward(80)
-            #
-            # if self.get_key(KEY_SHOOT) and not self.agent.is_reloading:
-            #     self.agent.shoot(1.0)
-            # #
-            # # if self.get_key(KEY_RANDOM):
-            # #     self.agent.neural_net = NeuralNetwork("test", 2, 14, ActivationFunction.SIGMOID)
-            #
-            # if self.get_key(KEY_LOOK_R):
-            #     self.agent.rotate(math.pi*0.75)
-            # elif self.get_key(KEY_LOOK_L):
-            #     self.agent.rotate(-math.pi*0.75)
-            #
-            # # Draw the world
-            # self.screen.fill((255, 255, 255))
-            # self.world.draw(self.screen)
 
             # Flip the display
             pygame.display.flip()

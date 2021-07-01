@@ -19,7 +19,7 @@ HFOV = FOV / 2.0
 
 class Action:
     def __init__(self):
-        pass
+        self.name = None
 
     def do(self, agent: Agent):
         raise NotImplementedError()
@@ -30,7 +30,12 @@ def to_color(value):
 
 
 def norm_weight(value):
-    return (value + 1.0) / 2.0
+    if value > 1:
+        return 1
+    if value < 0:
+        return 0
+
+    return value / 1
 
 
 class Agent(CollidableEntity):
@@ -58,6 +63,9 @@ class Agent(CollidableEntity):
         self.most_repeated_counter = 0
         self.is_enemy_in_fov = 0
         self.enemy_is_close = 0
+
+        self.font = pygame.font.SysFont('Arial', 15)
+        self.nn_input_labels = ['dst en', 'dst blt', 'x', 'y', 'rt angle', 'reload', 'en fov']
 
     @property
     def closest_entities(self):
@@ -215,7 +223,7 @@ class Agent(CollidableEntity):
         if self.manual:
             return
 
-        output = self.neural_net.perform_forward_propagation(nn_inputs)
+        output = self.neural_net.forward(nn_inputs)
 
         best_so_far = -1
         max_value = -1
@@ -245,25 +253,33 @@ class Agent(CollidableEntity):
 
         graph_h = 15 * max(self.neural_net.nodes_per_layer, self.neural_net.output_nodes, len(nn_inputs))
 
-        for x, layer in enumerate(self.neural_net.weights):
+        for x, layer in enumerate(self.neural_net.matrices):
             # sx/sy = current layer middle position
             # psx/psy = previous layer middle position
-            sy = by + (graph_h - (len(layer) * y_spacing) / 2.0)
-            psy = by + (graph_h - (len(layer[0]) - 1) * y_spacing / 2.0)
+            sy = by + (graph_h - (layer.shape[1] * y_spacing) / 2.0)
+            psy = by + (graph_h - (layer.shape[0] * y_spacing) / 2.0)
             sx = bx + ((x+1) * x_spacing)
             psx = bx + (x * x_spacing)
 
             for ny, n_node in enumerate(layer):
-                for y, weight in enumerate(n_node[:-1]):
-                    pygame.draw.line(surface, to_color(norm_weight(weight)), (psx, psy + (y_spacing * y)), (sx, sy + (y_spacing * ny)), 1)
-
-                pygame.draw.circle(surface, (65, 65, 65), (sx, sy + (y_spacing * ny)), 5)
+                for y, weight in enumerate(n_node):
+                    pygame.draw.line(surface, to_color(norm_weight(weight)), (psx, psy + (y_spacing * ny)), (sx, sy + (y_spacing * y)), 1)
+            
+            for y, _ in enumerate(layer[0]):
+                pygame.draw.circle(surface, (65, 65, 65), (sx, sy + (y_spacing * y)), 5)
 
             if x == 0:
-                for y in range(len(layer[0]) - 1):
-                    pygame.draw.circle(surface, to_color(nn_inputs[y]), (psx, psy + (y_spacing * y)), 5)
-            if x == len(self.neural_net.weights) - 1:
+                for y in range(layer.shape[0]):
+                    pygame.draw.circle(surface, to_color(nn_inputs[y]), (psx, psy + (y_spacing * y)), 5)                    
+                    label = self.font.render(self.nn_input_labels[y], True, (0, 0, 0))
+                    surface.blit(label, (0, psy + (y_spacing * y) -12))
+
+            if x == len(self.neural_net.matrices) - 1:
                 pygame.draw.circle(surface, (0, 255, 0), (sx, sy + (y_spacing * self.previous_action)), 5)
+                
+                for y, _ in enumerate(layer[0]):
+                    label = self.font.render(self.actions[y].name, True, (0, 0, 0))
+                    surface.blit(label, (sx + 7, sy + (y_spacing * y) - 12))
 
     def draw(self, surface):
         # Draw a solid blue circle in the center

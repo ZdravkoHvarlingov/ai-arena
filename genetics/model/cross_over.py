@@ -44,7 +44,7 @@ class TwoPointsCrossOver(CrossOver):
         child2.extend(arr1[points[0] + 1:points[1]])
         child2.extend(arr2[points[1]:])
 
-        return child1, child2
+        return np.array(child1), np.array(child2)
 
 
 @CrossOverMapper("arithmetic")

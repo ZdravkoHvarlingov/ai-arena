@@ -8,20 +8,8 @@ from genetics.world import World
 from genetics.geom import Vec2
 from genetics.model.neuralnet import NeuralNetwork
 from genetics.agent import Agent
-from genetics.actions import ShootAction, RotateAction,  MoveAction
-from genetics.input import input_manager
+from genetics.actions import ShootAction, RotateAction, MoveAction
 from .screen import Button
-
-
-KEY_FORWARD = pygame.K_SPACE
-KEY_LOOK_R = pygame.K_RIGHT
-KEY_LOOK_L = pygame.K_LEFT
-KEY_SHOOT = pygame.K_c
-KEY_SLOT1 = pygame.K_1
-KEY_SLOT2 = pygame.K_2
-
-FIGHT_TIME = 30
-MANUAL_CONTROL = False
 
 
 class ArenaScreen(Screen):
@@ -32,8 +20,8 @@ class ArenaScreen(Screen):
 
         self.nn1 = nn1
         self.nn2 = nn2
-        self.agent1 = Agent(self.world, Vec2(50, 250), [MoveAction(80), RotateAction(math.pi*0.5), RotateAction(-math.pi*0.5), ShootAction(1.0)], nn1, (91, 108, 207))
-        self.agent2 = Agent(self.world, Vec2(450, 250), [MoveAction(80), RotateAction(math.pi*0.5), RotateAction(-math.pi*0.5), ShootAction(1.0)], nn2, (216, 43, 83))
+        self.agent1 = Agent(self.world, Vec2(50, 250), [MoveAction(80), RotateAction(math.pi*0.25), RotateAction(-math.pi*0.25), ShootAction(1.0)], nn1, (91, 108, 207))
+        self.agent2 = Agent(self.world, Vec2(450, 250), [MoveAction(80), RotateAction(math.pi*0.25), RotateAction(-math.pi*0.25), ShootAction(1.0)], nn2, (216, 43, 83))
         self.world.add_entity(self.agent1)
         self.world.add_entity(self.agent2)
         self.world.set_main_agent(self.agent1)
@@ -45,10 +33,6 @@ class ArenaScreen(Screen):
         self.start = None
         self.is_started = False
         self.should_stop = False
-
-        if MANUAL_CONTROL:
-            self.agent1.manual = True
-            self.agent2.manual = True
 
         if self.agent1.neural_net.creator_tag == self.agent2.neural_net.creator_tag:
             self.agent1_name = "Bestie"
@@ -125,21 +109,5 @@ class ArenaScreen(Screen):
         super().draw(surface)
 
     def update(self, delta_ms: float):
-        if MANUAL_CONTROL:
-            # Check key inputs
-            if input_manager.get_key(KEY_FORWARD):
-                self.agent1.forward(80)
-
-            if input_manager.get_key(KEY_SHOOT):
-                self.agent1.shoot(1.0)
-            #
-            # if self.get_key(KEY_RANDOM):
-            #     self.agent.neural_net = NeuralNetwork("test", 2, 14, ActivationFunction.SIGMOID)
-
-            if input_manager.get_key(KEY_LOOK_R):
-                self.agent1.rotate(math.pi*0.75)
-            elif input_manager.get_key(KEY_LOOK_L):
-                self.agent1.rotate(-math.pi*0.75)
-
         self.world.update(delta_ms)
         super().update(delta_ms)

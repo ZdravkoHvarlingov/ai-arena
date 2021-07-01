@@ -1,4 +1,5 @@
 import math
+import time
 from genetics.world import World
 from genetics.geom import Vec2
 from genetics.model.neuralnet import NeuralNetwork
@@ -16,8 +17,8 @@ class EvaluationArena:
 
         self.nn1 = nn1
         self.nn2 = nn2
-        self.agent1 = Agent(self.world, Vec2(50, 250), [MoveAction(80), RotateAction(math.pi*0.5), RotateAction(-math.pi*0.5), ShootAction(1.0)], nn1, (91, 108, 207))
-        self.agent2 = Agent(self.world, Vec2(450, 250), [MoveAction(80), RotateAction(math.pi*0.5), RotateAction(-math.pi*0.5), ShootAction(1.0)], nn2, (216, 43, 83))
+        self.agent1 = Agent(self.world, Vec2(50, 250), [MoveAction(80), RotateAction(math.pi*0.25), RotateAction(-math.pi*0.25), ShootAction(1.0)], nn1, (91, 108, 207))
+        self.agent2 = Agent(self.world, Vec2(450, 250), [MoveAction(80), RotateAction(math.pi*0.25), RotateAction(-math.pi*0.25), ShootAction(1.0)], nn2, (216, 43, 83))
         self.world.add_entity(self.agent1)
         self.world.add_entity(self.agent2)
         self.world.set_main_agent(self.agent1)
@@ -26,12 +27,16 @@ class EvaluationArena:
         self.world.update(delta_ms)
 
     def perform_fight(self, frames):
-        dt_60_fps = 0.016666666666667 * 6
+        dt_60_fps = 1 / 60
+        dt_60_fps *= 2
 
+        start = time.time()
         tick = 0
         while tick < frames:
             self.update(dt_60_fps)
             tick += 1
+        end = time.time()
+        print(f'Fight finished in {end - start}s')
 
         agent1_metrics = AgentMetrics(self.agent1, frames)
         agent2_metrics = AgentMetrics(self.agent2, frames)

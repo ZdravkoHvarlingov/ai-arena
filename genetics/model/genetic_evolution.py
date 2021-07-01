@@ -2,14 +2,12 @@ import pickle
 import numpy as np
 
 from concurrent.futures import ThreadPoolExecutor
-from genetics.config import Config
 from .neuralnet import NeuralNetwork
 from .evaluation_arena import EvaluationArena
-from .selection import Selection
 
 from .utils import pickle_serialization
 
-NUMBER_OF_FRAMES = 600
+NUMBER_OF_FRAMES = 1800
 
 
 def thread_func(thread_pairs, res, fitness_func, thread_number, number_of_threads):
@@ -35,7 +33,7 @@ def thread_func(thread_pairs, res, fitness_func, thread_number, number_of_thread
 
 
 class GeneticEvolution:
-    def __init__(self, creator_tag, population_size, hidden_layers, nodes_per_layer, fitness_func,
+    def __init__(self, creator_tag, population_size, fitness_func,
                  activation_func, selection_algorithm, selection_parent_rate, mutation_algorithm, mutation_rate, cross_over):
         self._generation = 1
         self._population_size = population_size if population_size % 2 == 0 else population_size + 1
@@ -46,7 +44,7 @@ class GeneticEvolution:
         self.mutation_algorithm = mutation_algorithm
         self.is_evaluated = False
 
-        self._population = [(NeuralNetwork(creator_tag, hidden_layers, nodes_per_layer, activation_func, cross_over), 0) for _ in range(self._population_size)]
+        self._population = [(NeuralNetwork(creator_tag, activation_func, cross_over), 0) for _ in range(self._population_size)]
 
     @property
     def current_generation(self):

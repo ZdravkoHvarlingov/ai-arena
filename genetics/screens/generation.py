@@ -46,8 +46,6 @@ class GenerationScreen(Screen):
         self.genetic_algorithm = GeneticEvolution(
             Config.get("arena.creature_name_tag"),
             Config.get("algorithms.population_size"),
-            2,
-            14,
             fitness_func,
             FunctionMapper.get_func(Config.get("algorithms.activation_func")),
             SelectionMapper.get_selection(Config.get("algorithms.selection_type")),

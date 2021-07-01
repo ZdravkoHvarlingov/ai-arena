@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 
 class FunctionMapper:
@@ -18,20 +18,20 @@ class FunctionMapper:
 
 
 @FunctionMapper("sigmoid")
-def sigmoid(value):
-    return 1 / (1 + math.exp(-value))
+def sigmoid(feature_vector):
+    return 1 / (1 + np.exp(-feature_vector))
 
 
 @FunctionMapper("relu")
-def relu(value):
-    return value if value > 0 else 0
+def relu(feature_vector):
+    return np.maximum(feature_vector, 0)
 
 
 @FunctionMapper("leaky_relu")
-def leaky_relu(value):
-    return value if value > 0 else 0.01 * value
+def leaky_relu(feature_vector):
+    return np.maximum(feature_vector, 0.01 * feature_vector)
 
 
 @FunctionMapper("tanh")
-def tanh(value):
-    return 2 / (1 + math.exp(-2 * value)) - 1
+def tanh(feature_vector):
+    return np.tanh(feature_vector)
