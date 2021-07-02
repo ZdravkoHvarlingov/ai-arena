@@ -10,7 +10,7 @@ from .neuralnet import NeuralNetwork
 from .utils import pickle_serialization
 
 NUMBER_OF_FRAMES = 1800
-NUMBER_OF_FIGHTS_PER_CREATURE = 10
+NUMBER_OF_FIGHTS_PER_CREATURE = 5
 
 logging.basicConfig(format='[%(levelname)s] %(asctime)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger()

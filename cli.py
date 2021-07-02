@@ -25,7 +25,11 @@ if __name__ == '__main__':
     
     gen_serialization_folder = Config.get("serialization.generation_serialization_folder")
     num_processes = Config.get("algorithms.training_process_number")
+    if os.path.exists(os.path.join(gen_serialization_folder, 'generation.data')):
+        genetic_algorithm = genetic_algorithm.deserialize(os.path.join(gen_serialization_folder, 'generation.data'))
+    
     while True:
+        print(f'GENERATION #{genetic_algorithm.current_generation} evaluation started')
         genetic_algorithm.evaluate_population(num_processes)
         genetic_algorithm.serialize(os.path.join(gen_serialization_folder, 'generation.data'))
         print(f'TOP FITNESS FOR GENERATION #{genetic_algorithm.current_generation} is {genetic_algorithm.top_fitness}\n')
