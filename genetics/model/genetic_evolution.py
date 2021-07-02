@@ -5,12 +5,12 @@ import logging
 import numpy as np
 
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
 from .evaluation_arena import EvaluationArena
 from .neuralnet import NeuralNetwork
 from .utils import pickle_serialization
 
 NUMBER_OF_FRAMES = 1800
+NUMBER_OF_FIGHTS_PER_CREATURE = 10
 
 logging.basicConfig(format='[%(levelname)s] %(asctime)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger()
@@ -18,21 +18,22 @@ logger = logging.getLogger()
 
 def process_func(pairs, results_queue: multiprocessing.Queue, fitness_func):
     for pair in pairs:
-        nn1 = pair[0]
-        nn2 = pair[1]
+        net = pair[0]
+        enemies = pair[1]
 
-        try:
-            arena = EvaluationArena(nn1, nn2)
-            nn1_metrics, nn2_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
-        except Exception as error:
-            logger.exception('Exception')
-            print(f'Error happened while simulating the arena: {error}')
+        scores = []
+        for enemy in enemies:
+            try:
+                arena = EvaluationArena(net, enemy)
+                net_metrics, enemy_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
+                fight_score = fitness_func(net_metrics, enemy_metrics)
+                scores.append(fight_score)
+            except Exception as error:
+                logger.exception('Exception')
+                print(f'Error happened while simulating the arena: {error}')
 
-        score = fitness_func(nn1_metrics, nn2_metrics)
-        results_queue.put((nn1, score))
-
-        score = fitness_func(nn2_metrics, nn1_metrics)
-        results_queue.put((nn1, score))
+        final_score = sum(scores)
+        results_queue.put((net, final_score))
 
 class GeneticEvolution:
     def __init__(self, creator_tag, population_size, fitness_func,
@@ -70,10 +71,8 @@ class GeneticEvolution:
         return self._population[net_id][0]
 
     def evaluate_population(self, number_of_processes):
-        nets = list(map(lambda pair: pair[0], self._population))
-        np.random.shuffle(nets)
-        middle = len(nets) // 2
-        pairs = list(zip(nets[:middle], nets[middle:]))
+        pairs = self._create_evaluation_pairs()
+        logger.info(f'{len(pairs)} pairs in total with {len(pairs) * NUMBER_OF_FIGHTS_PER_CREATURE} fights to evaluate')
 
         batch_size = len(pairs) // number_of_processes
         if batch_size * number_of_processes != len(pairs):
@@ -102,6 +101,17 @@ class GeneticEvolution:
 
         self._population = results
         self.is_evaluated = True
+    
+    def _create_evaluation_pairs(self):
+        nets = list(map(lambda pair: pair[0], self._population))
+        nets_num = len(self._population)
+
+        pairs = []
+        for net in nets:
+            enemies = np.random.choice(nets_num, NUMBER_OF_FIGHTS_PER_CREATURE)
+            pairs.append((net, [nets[enemy_idx] for enemy_idx in enemies]))
+
+        return pairs
 
     def create_next_generation(self):
         selection_performer = self.selection_algorithm(self._population, self.selection_parent_rate)

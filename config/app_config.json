@@ -1,13 +1,13 @@
 {
     "algorithms": {
-        "population_size": 1000,
+        "population_size": 100,
         "selection_type": "roulette",
         "mutation_type": "all_weights_biased_mutation",
         "mutation_rate": 0.01,
         "cross_over_type": "two_points",
         "previous_generation_rate": 0.1,
         "activation_func": "tanh",
-        "training_process_number": 6
+        "training_process_number": 8
     },
     "serialization": {
         "serialization_frequency": 1,
