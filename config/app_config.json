@@ -7,7 +7,7 @@
         "cross_over_type": "two_points",
         "previous_generation_rate": 0.1,
         "activation_func": "tanh",
-        "training_process_number": 8
+        "training_process_number": 6
     },
     "serialization": {
         "serialization_frequency": 1,

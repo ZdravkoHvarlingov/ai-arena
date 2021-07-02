@@ -24,9 +24,7 @@ def process_func(pairs, results_queue: multiprocessing.Queue, fitness_func):
         scores = []
         for enemy in enemies:
             try:
-                arena = EvaluationArena(net, enemy)
-                net_metrics, enemy_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
-                fight_score = fitness_func(net_metrics, enemy_metrics)
+                fight_score = perform_fight(net, enemy, fitness_func)
                 scores.append(fight_score)
             except Exception as error:
                 logger.exception('Exception')
@@ -34,6 +32,21 @@ def process_func(pairs, results_queue: multiprocessing.Queue, fitness_func):
 
         final_score = sum(scores)
         results_queue.put((net, final_score))
+
+
+def perform_fight(net_to_evaluate, enemy_net, fitness_func):
+    start_position = np.random.choice(2)
+    
+    # The idea is to make the creature learn how to play from both sides
+    if start_position == 0:
+        arena = EvaluationArena(net_to_evaluate, enemy_net)
+        net_metrics, enemy_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
+        return fitness_func(net_metrics, enemy_metrics)
+
+    arena = EvaluationArena(enemy_net, net_to_evaluate)
+    enemy_metrics, net_metrics = arena.perform_fight(NUMBER_OF_FRAMES)
+    return fitness_func(net_metrics, enemy_metrics)
+
 
 class GeneticEvolution:
     def __init__(self, creator_tag, population_size, fitness_func,
@@ -45,6 +58,7 @@ class GeneticEvolution:
         self.selection_algorithm = selection_algorithm
         self.selection_parent_rate = selection_parent_rate
         self.mutation_algorithm = mutation_algorithm
+        self.generations_fitness = []
         self.is_evaluated = False
 
         self._population = [(NeuralNetwork(creator_tag, activation_func, cross_over), 0) for _ in range(self._population_size)]
@@ -100,6 +114,7 @@ class GeneticEvolution:
         results.sort(key=lambda x: x[1], reverse=True)
 
         self._population = results
+        self.generations_fitness.append(self._population[0][1])
         self.is_evaluated = True
     
     def _create_evaluation_pairs(self):
