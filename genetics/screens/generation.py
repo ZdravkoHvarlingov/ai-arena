@@ -22,7 +22,6 @@ logger = logging.getLogger()
 class GenerationScreen(Screen):
     def __init__(self):
         super().__init__()
-        self.font = pygame.font.SysFont('Arial', 40)
         self.render = None
 
         size = Vec2(100, 60)
