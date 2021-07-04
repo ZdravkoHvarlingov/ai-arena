@@ -17,7 +17,7 @@
         "best_creature_deserialization_folder": "best_so_far"
     },
     "arena": {
-        "creature_name_tag": "zdravko",
+        "creature_name_tag": "test",
         "fight_duration_in_s": 30
     }
 }
